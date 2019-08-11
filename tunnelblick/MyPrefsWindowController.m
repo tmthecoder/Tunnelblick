@@ -1626,20 +1626,79 @@ static BOOL firstTimeShowingWindow = TRUE;
     return nil;
     
 }
+
+bool hoppingEnabled = false;
+NSUInteger oldConnProf = 0;
+
+- (void) hopVPN:(NSTimer*)sender{
+    NSLog(@"Hopping");
+    VPNConnection *oldConn = [self connectionForLeftNavIndex: oldConnProf];
+    VPNConnection *connection = [self randomConn];
+    [oldConn addToLog: @"Disconnecting; VPN Details… window disconnect button pressed"];
+    NSString * oldRequestedState = [oldConn requestedState];
+    [oldConn startDisconnectingUserKnows: @YES];
+    if (  [oldRequestedState isEqualToString: @"EXITING"]  ) {
+        [oldConn displaySlowDisconnectionDialogLater];
+    }
+    [connection connect: sender userKnows: YES];
+    
+    if (hoppingEnabled) {
+        int interval = [self randomNumberBetween:30 maxNumber:200];
+        NSLog(@"state %d", interval);
+        [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:nil repeats:NO];
+    }
+}
+
+- (NSInteger)randomNumberBetween:(NSInteger)min maxNumber:(NSInteger)max
+{
+    return min + arc4random_uniform((uint32_t)(max - min + 1));
+}
+
+
 - (VPNConnection*) selectedConnection
 // Returns the connection associated with the currently selected connection or nil on error.
 {
+    oldConnProf = selectedLeftNavListIndex;
     return [self connectionForLeftNavIndex: selectedLeftNavListIndex];
+}
+
+- (VPNConnection*) randomConn
+// Returns the random profile sleected from the dictionary of profiles available
+{
+    NSMutableDictionary *configs = [ConfigurationManager getConfigurations];
+    NSLog(@"@%", configs);
+    int maxProfs = configs.count - 1;
+    NSLog(@"%d", maxProfs);
+    int randProfile = [self randomNumberBetween:0 maxNumber:maxProfs];
+    oldConnProf = (NSUInteger) randProfile;
+    return [self connectionForLeftNavIndex: (NSUInteger) randProfile];
 }
 
 // User Interface
 
 // Window
 
+- (IBAction)HoppingStateChange:(id)sender {
+    NSLog(@"state %ld", (long)[sender state]);
+    long checkState = (long)[sender state];
+    if (checkState == 1) {
+        NSLog(@"Timer Called");
+        hoppingEnabled = true;
+    } else {
+        NSLog(@"Hopping Disabled");
+        hoppingEnabled = false;
+    }
+}
+
 -(IBAction) connectButtonWasClicked: (id) sender
 {
     VPNConnection * connection = [self selectedConnection];
     if (  connection  ) {
+        if (hoppingEnabled) {
+            int interval = [self randomNumberBetween:30 maxNumber:200];
+            NSLog(@"%d", interval);
+            [NSTimer scheduledTimerWithTimeInterval:10.0f target:self selector:@selector(hopVPN:) userInfo:nil repeats:NO];
+        }
         [connection connect: sender userKnows: YES];
     } else {
         NSLog(@"connectButtonWasClicked but no configuration selected");

@@ -1447,6 +1447,7 @@ TBPROPERTY(          NSMutableArray *,         messagesIfConnectionFails,       
 
 -(void) finishMakingConnection: (NSDictionary *) dict {
 
+    NSLog(@"%@", dict);
 	
 	TBLog(@"DB-CD", @"finishMakingConnection: %@", dict)
 	
@@ -1530,7 +1531,7 @@ TBPROPERTY(          NSMutableArray *,         messagesIfConnectionFails,       
 	BOOL isDeployedConfiguration = [[argumentsUsedToStartOpenvpnstart objectAtIndex: 5] isEqualToString:@"2"];
 	
 	OSStatus status = runOpenvpnstart(argumentsUsedToStartOpenvpnstart, nil, &errOut);
-	
+    NSLog(@"Connected");
 	NSString * openvpnstartOutput;
 	if (  status != EXIT_SUCCESS  ) {
 		
