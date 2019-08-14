@@ -29,6 +29,7 @@
 @class LogDisplay;
 @class NetSocket;
 @class StatusWindowController;
+@class MyPrefsWindowController;
 
 typedef enum
 {

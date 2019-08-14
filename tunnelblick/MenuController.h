@@ -96,6 +96,7 @@ enum StatusIconPosition {
     NSMenuItem              * vpnDetailsItem;               // "VPN Details..." item for menu
     NSMenuItem              * addConfigurationItem;         // "Add a VPN..." menu item
     NSMenuItem              * contactTunnelblickItem;       // "Contact Tunnelblick..." menu item (if beta version)
+    NSMenuItem              * hoppingItem;                     // "Hopping Status" item for menu
     
 #ifdef INCLUDE_VPNSERVICE
     NSMenuItem              * registerForTunnelblickItem;//    "Register for Tunnelblick..." menu item

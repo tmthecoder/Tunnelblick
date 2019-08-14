@@ -1503,7 +1503,7 @@ done:
     if (errorCF) {
         CFRelease(errorCF);
     }
-    
+
     return (status == errSecSuccess);
 }
 

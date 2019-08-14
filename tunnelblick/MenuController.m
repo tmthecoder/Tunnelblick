@@ -1865,6 +1865,23 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     [quitItem setTarget: self];
     [quitItem setAction: @selector(quit:)];
     
+    [hoppingItem release];
+    hoppingItem = [[NSMenuItem alloc] init];
+    
+    if ([logScreen hoppingStatus]) {
+        if ([logScreen hoppingInterval]) {
+            int hopTime = [logScreen hoppingInterval]/60;
+            int hours = hopTime/60;
+            int mins = hopTime % 60;
+            [hoppingItem setTitle: [NSString stringWithFormat:@"Hopping at - %d:%d:00", hours, mins]];
+        } else {
+            [hoppingItem setTitle: @"Hopping: ON"];
+        }
+    } else {
+        [hoppingItem setTitle:@"Hopping: OFF"];
+    }
+    [hoppingItem setTarget:self];
+    
     [statusMenuItem release];
 	statusMenuItem = [[NSMenuItem alloc] init];
     [statusMenuItem setTarget: self];
@@ -1882,12 +1899,17 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
 	
     [myVPNMenu addItem:[NSMenuItem separatorItem]];
     
+    [myVPNMenu addItem: hoppingItem];
+    
+    [myVPNMenu addItem:[NSMenuItem separatorItem]];
+    
 	BOOL showVpnDetailsAtTop = (   ( ! [gTbDefaults boolForKey:@"doNotShowVpnDetailsMenuItem"] )
 								&& ( ! [gTbDefaults boolForKey:@"putVpnDetailsAtBottom"] ) );
     if (  showVpnDetailsAtTop  ) {
         [myVPNMenu addItem: vpnDetailsItem];
         [myVPNMenu addItem: [NSMenuItem separatorItem]];
 	}
+    
     
     // Add each connection to the menu
     NSString * dispNm;
@@ -1957,6 +1979,7 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     
     if (   ( ! [gTbDefaults boolForKey:@"doNotShowVpnDetailsMenuItem"] )
         && [gTbDefaults boolForKey:@"putVpnDetailsAtBottom"]  ) {
+        [myVPNMenu addItem: [NSMenuItem separatorItem]];
         [myVPNMenu addItem: vpnDetailsItem];
         [myVPNMenu addItem: [NSMenuItem separatorItem]];
 	}
@@ -3458,6 +3481,7 @@ BOOL anyNonTblkConfigs(void)
         }
     }
 }
+
 
 -(IBAction) contactTunnelblickWasClicked: (id) sender
 {

@@ -50,6 +50,7 @@
 #import "UIHelper.h"
 #import "UtilitiesView.h"
 #import "VPNConnection.h"
+#import "StatusWindowController.h"
 
 extern NSFileManager  * gFileMgr;
 extern TBUserDefaults * gTbDefaults;
@@ -1627,27 +1628,7 @@ static BOOL firstTimeShowingWindow = TRUE;
     
 }
 
-bool hoppingEnabled = false;
-NSUInteger oldConnProf = 0;
 
-- (void) hopVPN:(NSTimer*)sender{
-    NSLog(@"Hopping");
-    VPNConnection *oldConn = [self connectionForLeftNavIndex: oldConnProf];
-    VPNConnection *connection = [self randomConn];
-    [oldConn addToLog: @"Disconnecting; VPN Details… window disconnect button pressed"];
-    NSString * oldRequestedState = [oldConn requestedState];
-    [oldConn startDisconnectingUserKnows: @YES];
-    if (  [oldRequestedState isEqualToString: @"EXITING"]  ) {
-        [oldConn displaySlowDisconnectionDialogLater];
-    }
-    [connection connect: sender userKnows: YES];
-    
-    if (hoppingEnabled) {
-        int interval = [self randomNumberBetween:30 maxNumber:200];
-        NSLog(@"state %d", interval);
-        [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:nil repeats:NO];
-    }
-}
 
 - (NSInteger)randomNumberBetween:(NSInteger)min maxNumber:(NSInteger)max
 {
@@ -1658,46 +1639,137 @@ NSUInteger oldConnProf = 0;
 - (VPNConnection*) selectedConnection
 // Returns the connection associated with the currently selected connection or nil on error.
 {
-    oldConnProf = selectedLeftNavListIndex;
     return [self connectionForLeftNavIndex: selectedLeftNavListIndex];
 }
 
+/*
+ Duplicated from [self selectedConnection] to get a random profile from the pane
+ Made/Modified by Tejas Mehta
+ */
 - (VPNConnection*) randomConn
 // Returns the random profile sleected from the dictionary of profiles available
 {
     NSMutableDictionary *configs = [ConfigurationManager getConfigurations];
-    NSLog(@"@%", configs);
     int maxProfs = configs.count - 1;
     NSLog(@"%d", maxProfs);
     int randProfile = [self randomNumberBetween:0 maxNumber:maxProfs];
-    oldConnProf = (NSUInteger) randProfile;
     return [self connectionForLeftNavIndex: (NSUInteger) randProfile];
 }
 
 // User Interface
 
-// Window
+//VPN Hopping
 
-- (IBAction)HoppingStateChange:(id)sender {
-    NSLog(@"state %ld", (long)[sender state]);
-    long checkState = (long)[sender state];
-    if (checkState == 1) {
-        NSLog(@"Timer Called");
-        hoppingEnabled = true;
-    } else {
-        NSLog(@"Hopping Disabled");
-        hoppingEnabled = false;
+int hoppingInterval;
+BOOL hoppingStatus = false;
+
+/*
+ Check hopping status from other files
+ Made by Tejas Mehta
+ */
+
+- (BOOL) hoppingStatus {
+    return hoppingStatus;
+}
+
+- (int) hoppingInterval {
+    return hoppingInterval;
+}
+
+/*
+ VPN Hopping(Random interval at x minutes)
+ Made by Tejas Mehta
+ */
+- (void) hopVPN:(NSTimer *)timer{
+    //Get button sender id from timer
+    id parameter1 = [[timer userInfo] objectForKey:@"parameter1"];
+    NSLog(@"Hopping");
+    //Disconnect previously connected VPN
+    [self disconnectAll];
+    //Delay for good measure(No double connections)
+    double delayInSeconds = 1.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        NSLog(@"Do some work");
+        [self connectByRandom];
+    });
+    //If user wants to keep hopping, make a new timer aand pass sender id
+    if (hoppingStatus) {
+        int interval = [self randomNumberBetween:30 maxNumber:200] * 60;
+        hoppingInterval = interval;
+        NSLog(@"state %d", interval);
+        [statusControl setHopping:false interval:interval];
+        [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:@{@"parameter1": parameter1} repeats:NO];
     }
 }
 
+/*
+ Disconnect all VPNs
+ Taken from MenuController
+ */
+- (void) disconnectAll {
+    NSEnumerator * connEnum = [[((MenuController *)[NSApp delegate]) myVPNConnectionDictionary] objectEnumerator];
+    VPNConnection * connection;
+    while (  (connection = [connEnum nextObject])  ) {
+        if (  ! [connection isDisconnected]  ) {
+            [connection startDisconnectingUserKnows: @YES];
+        }
+    }
+}
+/*
+ Connect to a random VPN
+ Modified from MenuController by Tejas Mehta
+*/
+
+- (id) connectByRandom {
+    
+    NSDictionary * myVPNConnectionDictionary = [((MenuController *)[NSApp delegate]) myVPNConnectionDictionary];
+    NSArray *keys = [myVPNConnectionDictionary allKeys];
+    int randProfileNum = [self randomNumberBetween:0 maxNumber:keys.count-1];
+    VPNConnection * connection = [myVPNConnectionDictionary objectForKey:keys[randProfileNum]];
+    
+    if (  connection  ) {
+        if (  ! [connection isConnected] ) {
+            [connection connect: self userKnows: YES];
+            return @YES;
+        }
+    }
+    
+    return @NO;
+}
+// Window
+
+/*
+ Get button state and enable/disable hopping
+ By Tejas Mehta
+ */
+- (IBAction)HoppingStateChange:(id)sender {
+    long checkState = (long)[sender state];
+    if (checkState == 1) {
+        NSLog(@"Timer Called");
+        hoppingStatus = true;
+        [statusControl setHopping:true interval:nil];
+    } else {
+        NSLog(@"Hopping Disabled");
+        hoppingStatus = false;
+        [statusControl setHopping:false interval:nil];
+    }
+}
+
+/*
+ Modified to add hopping functionality on user connect
+ */
 -(IBAction) connectButtonWasClicked: (id) sender
 {
     VPNConnection * connection = [self selectedConnection];
     if (  connection  ) {
-        if (hoppingEnabled) {
-            int interval = [self randomNumberBetween:30 maxNumber:200];
+        if (hoppingStatus) {
+            //get a random interval & start the timer
+            int interval = [self randomNumberBetween:30 maxNumber:200] * 60;
+            hoppingInterval = interval;
             NSLog(@"%d", interval);
-            [NSTimer scheduledTimerWithTimeInterval:10.0f target:self selector:@selector(hopVPN:) userInfo:nil repeats:NO];
+            [statusControl setHopping:false interval:interval];
+            [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:@{@"parameter1": sender} repeats:NO];
         }
         [connection connect: sender userKnows: YES];
     } else {

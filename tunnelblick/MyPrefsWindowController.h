@@ -31,6 +31,7 @@
 @class UtilitiesView;
 @class VPNConnection;
 @class SettingsSheetWindowController;
+@class StatusWindowController;
 
 @interface MyPrefsWindowController : DBPrefsWindowController <NSTextViewDelegate, NSWindowDelegate, NSTabViewDelegate, NSTableViewDelegate>
 {   
@@ -61,6 +62,8 @@
     
     SettingsSheetWindowController * settingsSheetWindowController;
     
+    StatusWindowController        * statusControl; //Used to set hopping status
+    
     AuthorizationRef               authorization;                    // Authorization reference for Shared/Deployed configuration manipulation
     
     NSUInteger                     selectedWhenToConnectIndex;
@@ -82,7 +85,10 @@
 	
 	// For UtilitiesView
 	BOOL						   cancelUtilitiesQuitAllOpenVpn;
+    
 }
+
+
 
 
 // Methods used by MenuController or others to update the window
@@ -109,6 +115,11 @@
 
 // Used by LogDisplay to scroll to the current point in the log
 -(NSTextView *) logView;
+
+// Hopping Methods
+
+-(BOOL) hoppingStatus;
+-(int) hoppingInterval;
 
 // Methods for ConfigurationsView
 

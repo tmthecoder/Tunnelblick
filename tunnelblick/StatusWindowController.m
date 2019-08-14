@@ -32,6 +32,7 @@
 #import "TBOperationQueue.h"
 #import "TBUserDefaults.h"
 #import "UIHelper.h"
+#import "MyPrefsWindowController.h"
 
 
 extern TBUserDefaults * gTbDefaults;         // Our preferences
@@ -459,7 +460,7 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
         }
 		
         [theAnim setAnimationBlockingMode:  NSAnimationNonblocking];
-		
+        
         if (  [status isEqualToString:@"EXITING"]  ) {
             [animationIV setImage: [((MenuController *)[NSApp delegate]) largeMainImage]];
         } else if (  [status isEqualToString:@"CONNECTED"]  ) {
@@ -609,6 +610,7 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
 	[connectedSince release]; connectedSince = nil;
 	[theAnim        release]; theAnim        = nil;
 	[delegate       release]; delegate       = nil;
+    [logScreen      release];
 	
 	[super dealloc];
 }
@@ -628,6 +630,23 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
     return [[configurationNameTFC retain] autorelease];
 }
 
+-(void) setHopping: (BOOL) onOFF interval: (int) interval {    NSLog(@"STAT: %d, INTERVAL: %d", onOFF, interval);
+    if (onOFF) {
+        [hoppingStatTF setTextColor: [NSColor greenColor]];
+        if (interval) {
+            int intervalMin = interval/60;
+            int hours = intervalMin/60;
+            int mins = intervalMin%60;
+            [hoppingStatTF setStringValue: [NSString stringWithFormat: @"Hopping at - %d:%d:00", hours, mins]];
+        } else {
+            [hoppingStatTF setStringValue: @"Hopping: ON"];
+        }
+    } else {
+        [hoppingStatTF setTextColor: [NSColor yellowColor]];
+        [hoppingStatTF setStringValue: @"Hopping: OFF"];
+    }
+}
+
 -(void) setStatus: (NSString *) theStatus forName: (NSString *) theName connectedSince: (NSString *) theTime
 {
     if (  gShuttingDownWorkspace  ) {
@@ -645,6 +664,13 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
     [statusTFC            setStringValue: [NSString stringWithFormat: @"%@%@",
                                            localizeNonLiteral(theStatus, @"Connection status"),
                                            [self connectedSince]]];
+    NSLog(@"SETTING STATUS");
+    
+    /*
+     Set hopping ststus icon in the made text field
+     */
+    logScreen = (MyPrefsWindowController *)[[MyPrefsWindowController sharedPrefsWindowController] retain];
+    [self setHopping:[logScreen hoppingStatus] interval:[logScreen hoppingInterval]];
     
     if (   [theStatus isEqualToString: @"EXITING"]  ) {
         [configurationNameTFC setTextColor: [NSColor redColor]];

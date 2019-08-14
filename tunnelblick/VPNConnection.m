@@ -936,7 +936,7 @@ TBPROPERTY(          NSMutableArray *,         messagesIfConnectionFails,       
 	[dynamicChallengeFlags            release]; dynamicChallengeFlags            = nil;
 	[authRetryParameter				  release]; authRetryParameter               = nil;
 	[statistics.lastSet               release]; statistics.lastSet               = nil;
-	
+	    
     [super dealloc];
 }
 

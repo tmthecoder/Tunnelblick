@@ -20,6 +20,7 @@
  */
 
 #import "defines.h"
+@class MyPrefsWindowController;
 
 @interface StatusWindowController : NSWindowController <NSAnimationDelegate,NSWindowDelegate>
 {
@@ -54,7 +55,11 @@
     IBOutlet NSTextField     * outRateUnitsTF;
     IBOutlet NSTextField     * outTotalTF;
     IBOutlet NSTextField     * outTotalUnitsTF;
+    IBOutlet NSTextField     * hoppingStatTF;
     
+
+    MyPrefsWindowController * logScreen;                    // Log window ("VPN Details..." window)
+
     NSUInteger                 statusScreenPosition; // Position of status window (0, 1, 2...)
     //                                               // Corresponds to an entry in the statusScreenPositionsInUse array,
     //                                               // which is a static variable defined at the start of StatusWindowController.m
@@ -63,6 +68,8 @@
     NSString                 * localName;       // localizedName of configuration
     NSString                 * status;          // Status (e.g., "EXITING") of the configuration
     NSString                 * connectedSince;  // Time has been connected
+    NSString                 * hoppingTime;  // Time when hop will take place
+
     
     NSTrackingRectTag          trackingRectTag; // Used to track mouseEntered and mouseExited events for the window's view
     
@@ -82,6 +89,8 @@
     
     id                         delegate;
 }
+
+-(void) setHopping: (BOOL) onOFF interval: (int) interval; //Set hopping changer
 
 -(id)         initWithDelegate:       (id)         theDelegate;
 
@@ -106,6 +115,7 @@ TBPROPERTY(NSString *, name,           setName)
 TBPROPERTY(NSString *, localName,      setLocalName)
 TBPROPERTY(NSString *, status,         setStatus)
 TBPROPERTY(NSString *, connectedSince, setConnectedSince)
+
 TBPROPERTY(BOOL,       closedByRedDot, setClosedByRedDot)
 
 TBPROPERTY_READONLY(BOOL, haveLoadedFromNib)
