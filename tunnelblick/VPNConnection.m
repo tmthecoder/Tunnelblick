@@ -936,6 +936,7 @@ TBPROPERTY(          NSMutableArray *,         messagesIfConnectionFails,       
 	[dynamicChallengeFlags            release]; dynamicChallengeFlags            = nil;
 	[authRetryParameter				  release]; authRetryParameter               = nil;
 	[statistics.lastSet               release]; statistics.lastSet               = nil;
+    [prefControl                      release];
 	    
     [super dealloc];
 }
@@ -2832,12 +2833,18 @@ ifConnectionPreference: (NSString *)     keySuffix
 	if (![self isDisconnected]) {
         [self addToLog: @"Disconnecting; 'Disconnect' (toggle) menu command invoked"];
 		NSString * oldRequestedState = [self requestedState];
+        prefControl = (MyPrefsWindowController *)[[MyPrefsWindowController sharedPrefsWindowController] retain];
+        [prefControl stopHopping];
 		[self startDisconnectingUserKnows: @YES];
 		if (  [oldRequestedState isEqualToString: @"EXITING"]  ) {
 			[self displaySlowDisconnectionDialogLater];
 		}
 	} else {
         [self addToLog: @"Connecting; 'Connect' (toggle) menu command invoked"];
+        prefControl = (MyPrefsWindowController *)[[MyPrefsWindowController sharedPrefsWindowController] retain];
+        if ([prefControl hoppingStatus]) {
+            [prefControl startHopping:self];
+        }
 		[self connect: sender userKnows: YES];
 	}
 }

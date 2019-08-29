@@ -634,10 +634,7 @@ static pthread_mutex_t statusScreenPositionsInUseMutex = PTHREAD_MUTEX_INITIALIZ
     if (onOFF) {
         [hoppingStatTF setTextColor: [NSColor greenColor]];
         if (interval) {
-            int intervalMin = interval/60;
-            int hours = intervalMin/60;
-            int mins = intervalMin%60;
-            [hoppingStatTF setStringValue: [NSString stringWithFormat: @"Hopping at - %d:%d:00", hours, mins]];
+            [hoppingStatTF setStringValue: [NSString stringWithFormat: @"Hopping at - %@", [logScreen timeLeft]]];
         } else {
             [hoppingStatTF setStringValue: @"Hopping: ON"];
         }

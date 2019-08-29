@@ -11,6 +11,7 @@
                 <outlet property="appearancePrefsView" destination="44" id="296"/>
                 <outlet property="configurationsPrefsView" destination="493" id="678"/>
                 <outlet property="generalPrefsView" destination="1" id="190"/>
+                <outlet property="hoppingPreference" destination="mzI-X6-bHO" id="dXb-X3-YVc"/>
                 <outlet property="infoPrefsView" destination="117" id="298"/>
                 <outlet property="utilitiesPrefsView" destination="856" id="992"/>
             </connections>
@@ -263,22 +264,22 @@
                                                 <tabViewItems>
                                                     <tabViewItem label="Log$" identifier="log" id="533">
                                                         <view key="view" id="576">
-                                                            <rect key="frame" x="10" y="33" width="684" height="282"/>
+                                                            <rect key="frame" x="10" y="33" width="684" height="270"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="577">
-                                                                    <rect key="frame" x="-3" y="-3" width="690" height="282"/>
+                                                                    <rect key="frame" x="-3" y="-3" width="690" height="270"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <clipView key="contentView" drawsBackground="NO" id="pFr-B8-Xbr">
-                                                                        <rect key="frame" x="1" y="1" width="688" height="280"/>
+                                                                        <rect key="frame" x="1" y="1" width="688" height="268"/>
                                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                         <subviews>
                                                                             <textView editable="NO" importsGraphics="NO" horizontallyResizable="YES" verticallyResizable="YES" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" usesRuler="YES" spellingCorrection="YES" smartInsertDelete="YES" id="583" customClass="TBTextView">
-                                                                                <rect key="frame" x="0.0" y="0.0" width="688" height="280"/>
+                                                                                <rect key="frame" x="0.0" y="0.0" width="688" height="268"/>
                                                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                                 <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                                                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                                                <size key="minSize" width="688" height="280"/>
+                                                                                <size key="minSize" width="688" height="268"/>
                                                                                 <size key="maxSize" width="694" height="10000000"/>
                                                                                 <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                             </textView>
@@ -289,12 +290,12 @@
                                                                         <autoresizingMask key="autoresizingMask"/>
                                                                     </scroller>
                                                                     <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="581">
-                                                                        <rect key="frame" x="673" y="1" width="16" height="280"/>
+                                                                        <rect key="frame" x="673" y="1" width="16" height="268"/>
                                                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" heightSizable="YES"/>
                                                                     </scroller>
                                                                 </scrollView>
                                                                 <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="spinning" id="579">
-                                                                    <rect key="frame" x="314" y="109" width="32" height="32"/>
+                                                                    <rect key="frame" x="314" y="103" width="32" height="32"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                                                 </progressIndicator>
                                                             </subviews>

@@ -86,8 +86,10 @@
 	// For UtilitiesView
 	BOOL						   cancelUtilitiesQuitAllOpenVpn;
     
+    IBOutlet NSButton            * hoppingPreference;
+    
+    
 }
-
 
 
 
@@ -120,7 +122,10 @@
 
 -(BOOL) hoppingStatus;
 -(int) hoppingInterval;
-
+-(void) setHopping: (BOOL) hoppingVal;
+-(void) stopHopping;
+-(NSString *) timeLeft;
+-(void) startHopping: (id) sender;
 // Methods for ConfigurationsView
 
 - (VPNConnection*) selectedConnection;

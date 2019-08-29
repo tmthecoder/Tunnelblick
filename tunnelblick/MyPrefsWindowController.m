@@ -1662,6 +1662,10 @@ static BOOL firstTimeShowingWindow = TRUE;
 
 int hoppingInterval;
 BOOL hoppingStatus = false;
+int hoppingRemainingSec;
+NSString * message;
+NSTimer * hoppingTimer;
+NSTimer * hoppingRemainingTimer;
 
 /*
  Check hopping status from other files
@@ -1672,8 +1676,84 @@ BOOL hoppingStatus = false;
     return hoppingStatus;
 }
 
+/*
+ Check hopping interval from other files
+ Made by Tejas Mehta
+ */
+
 - (int) hoppingInterval {
     return hoppingInterval;
+}
+
+/*
+ Stop hopping from other files
+ Made by Tejas Mehta
+ */
+
+- (void) stopHopping {
+    hoppingInterval = 0;
+    [hoppingTimer invalidate];
+}
+
+/*
+ Get timeleft in countdown to hop
+ Made by Tejas Mehta
+ */
+
+- (NSString *) timeLeft {
+    return message;
+}
+
+- (void) startHopping: (id) sender {
+    int interval = [self randomNumberBetween:30 maxNumber:200] * 60;
+    hoppingInterval = interval;
+    NSLog(@"state %d", interval);
+    hoppingRemainingSec = interval;
+    hoppingTimer = [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:@{@"parameter1": sender} repeats:NO];
+    hoppingRemainingTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(hoppingTimeCount) userInfo:nil repeats:YES];
+}
+
+/*
+ hopping switch from other files
+ Made by Tejas Mehta
+ */
+
+- (void) setHopping: (BOOL) hoppingVal {
+    hoppingStatus = hoppingVal;
+    if (hoppingVal) {
+        [hoppingPreference setState:NSOnState];
+    } else {
+        [hoppingPreference setState:NSOffState];
+    }
+}
+
+/*
+ Countdown timer for hopping
+ Made by Tejas Mehta
+ */
+
+- (NSString *) hoppingTimeCount {
+    if (hoppingRemainingSec >= 0) {
+        int minutes, seconds;
+        int hours;
+        
+        hoppingRemainingSec--;
+        
+        hours = hoppingRemainingSec / 3600;
+        minutes = (hoppingRemainingSec % 3600) / 60;
+        seconds = (hoppingRemainingSec % 3600) % 60;
+        message = [NSString stringWithFormat:@"%d:%02d:%02d", hours, minutes, seconds];
+    } else {
+        message = @"HOPPING NOW";
+    }
+    if (hoppingRemainingSec <= 0) {
+        NSLog(@"TIME OUT");
+        if ([hoppingRemainingTimer isValid]) {
+            [hoppingRemainingTimer invalidate];
+            hoppingRemainingTimer = nil;
+        }
+    }
+    return message;
 }
 
 /*
@@ -1697,9 +1777,10 @@ BOOL hoppingStatus = false;
     if (hoppingStatus) {
         int interval = [self randomNumberBetween:30 maxNumber:200] * 60;
         hoppingInterval = interval;
+        hoppingRemainingSec = interval;
         NSLog(@"state %d", interval);
-        [statusControl setHopping:false interval:interval];
-        [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:@{@"parameter1": parameter1} repeats:NO];
+        hoppingTimer = [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:@{@"parameter1": parameter1} repeats:NO];
+        hoppingRemainingTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(hoppingTimeCount) userInfo:nil repeats:YES];
     }
 }
 
@@ -1753,6 +1834,7 @@ BOOL hoppingStatus = false;
         NSLog(@"Hopping Disabled");
         hoppingStatus = false;
         [statusControl setHopping:false interval:nil];
+        [self stopHopping];
     }
 }
 
@@ -1768,8 +1850,9 @@ BOOL hoppingStatus = false;
             int interval = [self randomNumberBetween:30 maxNumber:200] * 60;
             hoppingInterval = interval;
             NSLog(@"%d", interval);
-            [statusControl setHopping:false interval:interval];
-            [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:@{@"parameter1": sender} repeats:NO];
+            hoppingRemainingSec = interval;
+            hoppingTimer = [NSTimer scheduledTimerWithTimeInterval:interval target:self selector:@selector(hopVPN:) userInfo:@{@"parameter1": sender} repeats:NO];
+            hoppingRemainingTimer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(hoppingTimeCount) userInfo:nil repeats:YES];
         }
         [connection connect: sender userKnows: YES];
     } else {
@@ -1786,6 +1869,7 @@ BOOL hoppingStatus = false;
     if (  connection  ) {
         [connection addToLog: @"Disconnecting; VPN Details… window disconnect button pressed"];
 		NSString * oldRequestedState = [connection requestedState];
+        [self stopHopping];
         [connection startDisconnectingUserKnows: @YES];
         if (  [oldRequestedState isEqualToString: @"EXITING"]  ) {
 			[connection displaySlowDisconnectionDialogLater];

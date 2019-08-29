@@ -1210,6 +1210,21 @@ TBSYNTHESIZE_OBJECT(retain, NSString     *, tunnelblickVersionString,  setTunnel
     [super dealloc];
 }
 
+BOOL launched = false;
+
+- (IBAction) hoppingOnOff: (id) sender
+{
+    if (!launched) {
+        [self openPreferencesWindow:sender];
+        launched = true;
+    }
+    if ([logScreen hoppingStatus]) {
+        [logScreen setHopping:false];
+    } else {
+        [logScreen setHopping:true];
+    }
+}
+
 -(BOOL) userIsAnAdmin
 {
     return userIsAnAdmin;
@@ -1418,6 +1433,7 @@ TBSYNTHESIZE_OBJECT(retain, NSString     *, tunnelblickVersionString,  setTunnel
     [self setScreenList: [NSArray arrayWithArray: screens]];
     TBLog(@"DB-SI", @"updateScreenList: New screen list = %@", screenArray)
 }
+
 
 -(unsigned) statusScreenIndex {
     
@@ -1869,18 +1885,12 @@ static pthread_mutex_t myVPNMenuMutex = PTHREAD_MUTEX_INITIALIZER;
     hoppingItem = [[NSMenuItem alloc] init];
     
     if ([logScreen hoppingStatus]) {
-        if ([logScreen hoppingInterval]) {
-            int hopTime = [logScreen hoppingInterval]/60;
-            int hours = hopTime/60;
-            int mins = hopTime % 60;
-            [hoppingItem setTitle: [NSString stringWithFormat:@"Hopping at - %d:%d:00", hours, mins]];
-        } else {
-            [hoppingItem setTitle: @"Hopping: ON"];
-        }
+        [hoppingItem setTitle: @"Hopping: ON"];
     } else {
         [hoppingItem setTitle:@"Hopping: OFF"];
     }
     [hoppingItem setTarget:self];
+    [hoppingItem setAction:@selector(hoppingOnOff:)];
     
     [statusMenuItem release];
 	statusMenuItem = [[NSMenuItem alloc] init];
@@ -8534,13 +8544,18 @@ static pthread_mutex_t threadIdsMutex = PTHREAD_MUTEX_INITIALIZER;
     if (  connection  ) {
         if (  choice == statusWindowControllerDisconnectChoice  ) {
             [connection addToLog: @"Disconnecting; notification window disconnect button pressed"];
+            
 			NSString * oldRequestedState = [connection requestedState];
+            [logScreen stopHopping];
 			[connection startDisconnectingUserKnows: @YES];
 			if (  [oldRequestedState isEqualToString: @"EXITING"]  ) {
 				[connection displaySlowDisconnectionDialogLater];
 			}
         } else if (  choice == statusWindowControllerConnectChoice  ) {
             [connection addToLog: @"Connecting; notification window connect button pressed"];
+            if ([logScreen hoppingStatus]) {
+                [logScreen startHopping:ctl]; // start hopping if checked
+            }
             [connection connect: self userKnows: YES];
         } else {
             NSLog(@"Invalid choice -- statusWindowController:finishedWithChoice: %d forDisplayName: %@", choice, theName);
