@@ -749,9 +749,10 @@ name = newValue;                                    \
 @"ApplicationCrashedAfterRelaunch",	\
 \
 /* No longer used */	\
-@"managementPortStartingPortNumber",	\
-@"userAgreementVersionAgreedTo",	\
 @"askedUserIfOKToCheckThatIPAddressDidNotChangeAfterConnection",	\
+@"buildExpirationTimestamp",	\
+@"daysBeforeFirstWarningOfOldBuild",	\
+@"daysToDeferWarningOfOldBuild",	\
 @"doNotShowCheckForUpdatesNowMenuItem",	\
 @"doNotShowForcedPreferenceMenuItems",	\
 @"doNotShowKeyboardShortcutSubmenu",	\
@@ -759,6 +760,7 @@ name = newValue;                                    \
 @"haveDealtWithSparkle1dot5b6",	\
 @"keyboardShortcutKeyCode",	\
 @"keyboardShortcutModifiers",	\
+@"managementPortStartingPortNumber",	\
 @"maximumLogSize",	\
 @"skipWarningAboutUsingOpenvpnTxpVersion",	\
 @"skipWarningAboutUsingOpenvpnNonTxpVersion",	\
@@ -771,6 +773,7 @@ name = newValue;                                    \
 @"updateSendProfileInfo",	\
 @"updateSigned",	\
 @"updateUnsigned"	\
+@"userAgreementVersionAgreedTo",	\
 @"useShadowConfigurationFiles",	\
 ]
 
