@@ -12,7 +12,7 @@ third_party/built-*
 third_party/do-not-clean
 third_party/products/
 tunnelblick/build
-
+tunnelblick/.idea
 # OS generated files #
 ######################
 .DS_Store
